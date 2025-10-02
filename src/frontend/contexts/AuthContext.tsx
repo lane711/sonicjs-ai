@@ -43,9 +43,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return
       }
 
-      // Verify token with backend
-      const response = await apiClient.get<User>('/auth/me')
-      setUser(response.data)
+      // Verify token with backend - returns {user: {...}}
+      const response = await apiClient.get<{ user: User }>('/api/auth/me')
+      setUser(response.user)
     } catch (error) {
       // Token invalid or expired
       apiClient.removeToken()
@@ -60,15 +60,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
    */
   async function login(credentials: LoginCredentials) {
     try {
-      const response = await apiClient.post<AuthResponse>('/auth/login', credentials)
+      // apiClient.post now returns T directly (unwrapped from axios response)
+      // Backend returns {user: {...}, token: "..."}
+      const authData = await apiClient.post<AuthResponse>('/api/auth/login', credentials)
+
+      if (!authData || !authData.token || !authData.user) {
+        throw new Error('Invalid response from server')
+      }
 
       // Store token
-      apiClient.setToken(response.data.token)
+      apiClient.setToken(authData.token)
 
       // Set user
-      setUser(response.data.user)
-    } catch (error) {
-      throw error
+      setUser(authData.user)
+    } catch (error: any) {
+      // Provide more helpful error message
+      const message = error.response?.data?.error || error.message || 'Login failed'
+      throw new Error(message)
     }
   }
 
@@ -78,7 +86,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   async function logout() {
     try {
       // Call logout endpoint
-      await apiClient.post('/auth/logout')
+      await apiClient.post('/api/auth/logout')
     } catch (error) {
       console.error('Logout error:', error)
     } finally {
@@ -93,8 +101,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
    */
   async function refreshUser() {
     try {
-      const response = await apiClient.get<User>('/auth/me')
-      setUser(response.data)
+      // Returns {user: {...}}
+      const response = await apiClient.get<{ user: User }>('/api/auth/me')
+      setUser(response.user)
     } catch (error) {
       console.error('Failed to refresh user:', error)
       // If refresh fails, log user out

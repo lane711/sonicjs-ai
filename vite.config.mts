@@ -1,6 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'path'
+import { fileURLToPath } from 'url'
+import { dirname, resolve } from 'path'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -12,40 +16,32 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        main: path.resolve(__dirname, 'src/frontend/index.html'),
+        main: resolve(__dirname, 'src/frontend/index.html'),
       },
     },
   },
   server: {
     port: 3000,
     proxy: {
-      // Proxy API requests to Hono backend
+      // Proxy API and auth API requests to Hono backend
       '/api': {
         target: 'http://localhost:8787',
         changeOrigin: true,
-      },
-      '/auth': {
-        target: 'http://localhost:8787',
-        changeOrigin: true,
-      },
-      '/admin': {
-        target: 'http://localhost:8787',
-        changeOrigin: true,
-        // Don't proxy admin routes that should be handled by React
-        bypass: (req) => {
-          // Let React handle these routes
-          if (req.url?.match(/\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/)) {
-            return req.url
+        rewrite: (path) => {
+          // Rewrite /api/auth/* to /auth/* on the backend
+          if (path.startsWith('/api/auth')) {
+            return path.replace(/^\/api\/auth/, '/auth')
           }
-          return null
+          return path
         },
       },
+      // Note: /auth and /admin routes are handled by React Router, not proxied
     },
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src/frontend'),
-      '@shared': path.resolve(__dirname, './src/shared'),
+      '@': resolve(__dirname, './src/frontend'),
+      '@shared': resolve(__dirname, './src/shared'),
     },
   },
   define: {

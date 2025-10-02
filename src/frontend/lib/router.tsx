@@ -8,6 +8,9 @@ import React from 'react'
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 
+// Components
+import { AdminLayout } from '@/components/layout/AdminLayout'
+
 // Lazy load pages
 const LoginPage = React.lazy(() => import('@/pages/LoginPage'))
 const DashboardPage = React.lazy(() => import('@/pages/DashboardPage'))
@@ -77,10 +80,15 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       {
-        path: '/admin',
-        element: <DashboardPage />,
+        element: <AdminLayout />,
+        children: [
+          {
+            path: '/admin',
+            element: <DashboardPage />,
+          },
+          // More admin routes will be added in Phase 3
+        ],
       },
-      // More admin routes will be added in Phase 3
     ],
   },
 

@@ -7,7 +7,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios'
 import type { APIResponse, APIError } from '@shared/types'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 
 class APIClient {
   private client: AxiosInstance
@@ -101,8 +101,8 @@ class APIClient {
   /**
    * GET request
    */
-  async get<T>(url: string, config?: AxiosRequestConfig): Promise<APIResponse<T>> {
-    const response = await this.client.get<APIResponse<T>>(url, config)
+  async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    const response = await this.client.get<T>(url, config)
     return response.data
   }
 
@@ -113,8 +113,8 @@ class APIClient {
     url: string,
     data?: any,
     config?: AxiosRequestConfig
-  ): Promise<APIResponse<T>> {
-    const response = await this.client.post<APIResponse<T>>(url, data, config)
+  ): Promise<T> {
+    const response = await this.client.post<T>(url, data, config)
     return response.data
   }
 
@@ -125,8 +125,8 @@ class APIClient {
     url: string,
     data?: any,
     config?: AxiosRequestConfig
-  ): Promise<APIResponse<T>> {
-    const response = await this.client.put<APIResponse<T>>(url, data, config)
+  ): Promise<T> {
+    const response = await this.client.put<T>(url, data, config)
     return response.data
   }
 
@@ -137,16 +137,16 @@ class APIClient {
     url: string,
     data?: any,
     config?: AxiosRequestConfig
-  ): Promise<APIResponse<T>> {
-    const response = await this.client.patch<APIResponse<T>>(url, data, config)
+  ): Promise<T> {
+    const response = await this.client.patch<T>(url, data, config)
     return response.data
   }
 
   /**
    * DELETE request
    */
-  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<APIResponse<T>> {
-    const response = await this.client.delete<APIResponse<T>>(url, config)
+  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    const response = await this.client.delete<T>(url, config)
     return response.data
   }
 
@@ -157,7 +157,7 @@ class APIClient {
     url: string,
     file: File,
     onProgress?: (progress: number) => void
-  ): Promise<APIResponse<T>> {
+  ): Promise<T> {
     const formData = new FormData()
     formData.append('file', file)
 
@@ -178,7 +178,7 @@ class APIClient {
       }
     }
 
-    const response = await this.client.post<APIResponse<T>>(url, formData, config)
+    const response = await this.client.post<T>(url, formData, config)
     return response.data
   }
 }
