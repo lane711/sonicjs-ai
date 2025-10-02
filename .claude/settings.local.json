@@ -133,14 +133,17 @@
       "Bash(timeout 30s npm run test -- src/tests/utils.template-renderer.test.ts)",
       "Bash(timeout 30 npx vitest --run --coverage --reporter=verbose 2 > /dev/null)",
       "Bash(wrangler d1 migrations list:*)",
-      "Bash(wrangler d1 migrations apply:*)"
+      "Bash(wrangler d1 migrations apply:*)",
+      "Read(//Users/lane/Library/**)"
     ],
     "deny": []
   },
   "mcpServers": {
     "memory": {
       "command": "npx",
-      "args": ["@modelcontextprotocol/server-memory"],
+      "args": [
+        "@modelcontextprotocol/server-memory"
+      ],
       "env": {
         "MEMORY_PERSIST": "true",
         "MEMORY_PATH": "./docs/ai/claude-memory.json"
