@@ -9,11 +9,17 @@ import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 
 // Components
-import { AdminLayout } from '@/components/layout/AdminLayout'
+import { AdminLayoutCatalyst } from '@/components/layout/AdminLayoutCatalyst'
 
 // Lazy load pages
 const LoginPage = React.lazy(() => import('@/pages/LoginPage'))
 const DashboardPage = React.lazy(() => import('@/pages/DashboardPage'))
+const ContentPage = React.lazy(() => import('@/pages/ContentPage'))
+const MediaPage = React.lazy(() => import('@/pages/MediaPage'))
+const UsersPage = React.lazy(() => import('@/pages/UsersPage'))
+const PluginsPage = React.lazy(() => import('@/pages/PluginsPage'))
+const ActivityLogsPage = React.lazy(() => import('@/pages/ActivityLogsPage'))
+const SettingsPage = React.lazy(() => import('@/pages/SettingsPage'))
 const NotFoundPage = React.lazy(() => import('@/pages/NotFoundPage'))
 
 /**
@@ -80,13 +86,36 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       {
-        element: <AdminLayout />,
+        element: <AdminLayoutCatalyst />,
         children: [
           {
             path: '/admin',
             element: <DashboardPage />,
           },
-          // More admin routes will be added in Phase 3
+          {
+            path: '/admin/content',
+            element: <ContentPage />,
+          },
+          {
+            path: '/admin/media',
+            element: <MediaPage />,
+          },
+          {
+            path: '/admin/users',
+            element: <UsersPage />,
+          },
+          {
+            path: '/admin/plugins',
+            element: <PluginsPage />,
+          },
+          {
+            path: '/admin/logs',
+            element: <ActivityLogsPage />,
+          },
+          {
+            path: '/admin/settings',
+            element: <SettingsPage />,
+          },
         ],
       },
     ],

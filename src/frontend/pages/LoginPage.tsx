@@ -99,7 +99,7 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
-              Demo credentials: admin@example.com / password
+              Demo credentials: admin@sonicjs.com / admin
             </p>
           </div>
         </div>

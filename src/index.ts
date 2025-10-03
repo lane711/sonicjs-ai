@@ -132,6 +132,11 @@ app.route('/admin/logs', adminLogsRoutes)
 // app.route('/admin/email', emailRoutes)
 app.route('/admin/users', userRoutes)
 
+// Hello world test endpoint
+app.get('/hello-world', (c) => {
+  return c.text('Hello World')
+})
+
 // Root redirect to login
 app.get('/', (c) => {
   return c.redirect('/auth/login')
