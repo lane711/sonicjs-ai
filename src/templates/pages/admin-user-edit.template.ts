@@ -313,7 +313,8 @@ export function renderUserEditPage(data: UserEditPageData): string {
       function performDeleteUser() {
         if (!userIdToDelete) return;
 
-        const hardDelete = document.getElementById('hard-delete-checkbox').checked;
+        const checkbox = document.getElementById('hard-delete-checkbox');
+        const hardDelete = checkbox ? checkbox.checked : false;
 
         fetch(\`/admin/users/\${userIdToDelete}\`, {
           method: 'DELETE',
@@ -325,7 +326,11 @@ export function renderUserEditPage(data: UserEditPageData): string {
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            window.location.href = '/admin/users'
+            // Add a small delay to ensure database transaction completes
+            // and add cache busting to force refresh
+            setTimeout(() => {
+              window.location.href = '/admin/users?_t=' + Date.now()
+            }, 300)
           } else {
             alert('Error deleting user: ' + (data.error || 'Unknown error'))
           }

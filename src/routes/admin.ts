@@ -19,7 +19,7 @@ import { APP_VERSION } from '../index'
 
 type Bindings = {
   DB: D1Database
-  KV: KVNamespace
+  CACHE_KV: KVNamespace
   MEDIA_BUCKET: R2Bucket
   ENVIRONMENT?: string
 }
@@ -187,9 +187,9 @@ adminRoutes.get('/api/stats', async (c) => {
     const recentActivity: any[] = []
 
     try {
-      // Get recent content updates (last 5)
+      // Get recent content changes (created, updated, deleted - last 5)
       const contentStmt = db.prepare(`
-        SELECT c.id, c.title, c.updated_at, u.email, u.first_name, u.last_name
+        SELECT c.id, c.title, c.status, c.created_at, c.updated_at, u.email, u.first_name, u.last_name
         FROM content c
         LEFT JOIN users u ON c.created_by = u.id
         ORDER BY c.updated_at DESC
@@ -202,11 +202,27 @@ adminRoutes.get('/api/stats', async (c) => {
           ? `${row.first_name} ${row.last_name}`
           : row.email || 'Unknown'
 
+        // Determine if this was created, updated, or deleted
+        // If created_at and updated_at are within 1 second, it's a new creation
+        const isNewlyCreated = Math.abs(Number(row.created_at) - Number(row.updated_at)) < 1000
+        const isDeleted = row.status === 'deleted'
+
+        let action = 'updated'
+        let description = `Content "${row.title}" updated`
+
+        if (isDeleted) {
+          action = 'deleted'
+          description = `Content "${row.title}" deleted`
+        } else if (isNewlyCreated) {
+          action = 'created'
+          description = `Content "${row.title}" created`
+        }
+
         recentActivity.push({
           id: row.id,
           type: 'content',
-          action: 'updated',
-          description: `Content "${row.title}" updated`,
+          action: action,
+          description: description,
           timestamp: new Date(Number(row.updated_at)).toISOString(),
           user: userName
         })
@@ -327,9 +343,9 @@ adminRoutes.get('/api/recent-activity', async (c) => {
     const recentActivity: any[] = []
 
     try {
-      // Get recent content updates (last 5)
+      // Get recent content changes (created, updated, deleted - last 5)
       const contentStmt = db.prepare(`
-        SELECT c.id, c.title, c.updated_at, u.email, u.first_name, u.last_name
+        SELECT c.id, c.title, c.status, c.created_at, c.updated_at, u.email, u.first_name, u.last_name
         FROM content c
         LEFT JOIN users u ON c.created_by = u.id
         ORDER BY c.updated_at DESC
@@ -342,11 +358,27 @@ adminRoutes.get('/api/recent-activity', async (c) => {
           ? `${row.first_name} ${row.last_name}`
           : row.email || 'Unknown'
 
+        // Determine if this was created, updated, or deleted
+        // If created_at and updated_at are within 1 second, it's a new creation
+        const isNewlyCreated = Math.abs(Number(row.created_at) - Number(row.updated_at)) < 1000
+        const isDeleted = row.status === 'deleted'
+
+        let action = 'updated'
+        let description = `Content "${row.title}" updated`
+
+        if (isDeleted) {
+          action = 'deleted'
+          description = `Content "${row.title}" deleted`
+        } else if (isNewlyCreated) {
+          action = 'created'
+          description = `Content "${row.title}" created`
+        }
+
         recentActivity.push({
           id: row.id,
           type: 'content',
-          action: 'updated',
-          description: `Content "${row.title}" updated`,
+          action: action,
+          description: description,
           timestamp: new Date(Number(row.updated_at)).toISOString(),
           user: userName
         })
@@ -433,7 +465,7 @@ adminRoutes.get('/api/recent-activity', async (c) => {
 adminRoutes.get('/api/system-status', async (c) => {
   try {
     const db = c.env.DB
-    const kv = c.env.KV
+    const kv = c.env.CACHE_KV
     const r2 = c.env.MEDIA_BUCKET
 
     // Check webserver (always operational if we're here)
@@ -532,7 +564,7 @@ adminRoutes.get('/api/system-status', async (c) => {
 
     return c.html(html`
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        ${statusCards}
+        ${raw(statusCards)}
       </div>
     `)
   } catch (error) {
@@ -730,8 +762,8 @@ adminRoutes.post('/collections', async (c) => {
 
     // Clear cache
     try {
-      await c.env.KV.delete('cache:collections:all')
-      await c.env.KV.delete(`cache:collection:${name}`)
+      await c.env.CACHE_KV.delete('cache:collections:all')
+      await c.env.CACHE_KV.delete(`cache:collection:${name}`)
     } catch (e) {
       console.error('Error clearing cache:', e)
     }

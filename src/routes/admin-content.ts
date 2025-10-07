@@ -20,6 +20,7 @@ type Variables = {
     exp: number
     iat: number
   }
+  appVersion?: string
 }
 
 export const adminContentRoutes = new Hono<{ Bindings: Bindings; Variables: Variables }>()
@@ -428,9 +429,10 @@ adminContentRoutes.get('/:id/edit', async (c) => {
         name: user.email,
         email: user.email,
         role: user.role
-      } : undefined
+      } : undefined,
+      version: c.get('appVersion')
     }
-    
+
     return c.html(renderContentFormPage(formData))
   } catch (error) {
     console.error('Error loading edit content form:', error)

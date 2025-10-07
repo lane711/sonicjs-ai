@@ -39,7 +39,7 @@ export const APP_VERSION = `v${packageJson.version}`
 // Define the Cloudflare Workers environment
 type Bindings = {
   DB: D1Database
-  KV: KVNamespace
+  CACHE_KV: KVNamespace
   MEDIA_BUCKET: R2Bucket
   ASSETS: Fetcher
   EMAIL_QUEUE?: Queue
@@ -60,9 +60,17 @@ type Variables = {
   }
   requestId?: string
   startTime?: number
+  appVersion?: string
 }
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
+
+// Set app version globally
+const appVersion = '2.0.0-alpha.4' // Update this when releasing new versions
+app.use('*', async (c, next) => {
+  c.set('appVersion', appVersion)
+  await next()
+})
 
 // Bootstrap middleware - runs system initialization
 app.use('*', bootstrapMiddleware())
