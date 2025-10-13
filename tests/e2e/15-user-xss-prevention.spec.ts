@@ -10,7 +10,7 @@ test.describe('User XSS Prevention', () => {
     // Login first to get auth token
     const loginResponse = await request.post('/auth/login', {
       data: {
-        email: 'admin@example.com',
+        email: 'admin@sonicjs.com',
         password: 'admin123'
       }
     });
@@ -84,7 +84,7 @@ test.describe('User XSS Prevention', () => {
     // Login to get auth token
     const loginResponse = await request.post('/auth/login', {
       data: {
-        email: 'admin@example.com',
+        email: 'admin@sonicjs.com',
         password: 'admin123'
       }
     });
